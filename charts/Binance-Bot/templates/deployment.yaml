@@ -1,0 +1,78 @@
+{{- if .Values.bot.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: freqtrade
+spec:
+  selector:
+    matchLabels:
+      app: binance-freqtrade
+  template:
+    metadata:
+      labels:
+        app: binance-freqtrade
+    spec:
+      containers:
+      - name: freqtrade
+        image: {{ .Values.image.base }}:{{ .Values.image.tag }}
+        command:
+        - freqtrade
+        args:
+        - trade
+        - --config
+        - /freqtrade/config/config.json
+        - --strategy
+        - {{ .Values.bot.strategy_name }}
+        - --db-url
+        - sqlite:////sqlite/binance-sim-tradesv3.sqlite
+        volumeMounts:
+        - mountPath: /freqtrade/config
+          name: config
+        - mountPath: /freqtrade/user_data/strategies
+          name: strategies
+        - mountPath: /sqlite
+          name: sqlite
+        ports:
+        - name: api
+          containerPort: 8080
+      initContainers:
+      - name: init-mydb
+        image: {{ .Values.image.base }}:{{ .Values.image.tag }}
+        command: ["sudo", "chown", "-R", "1000:1000", "/sqlite"]
+        volumeMounts:
+        - name: sqlite
+          mountPath: /sqlite        
+      volumes:
+      - name: config
+        configMap:
+          name: freqtrade-config
+      - name: strategies
+        configMap:
+          name: freqtrade-strategies
+      - name: sqlite
+        persistentVolumeClaim:
+          claimName: binance-freqtrade-sqlite-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: binance-freqtrade-sqlite-pvc
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.bot.pvc_size }}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: binance-freqtrade-pv
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+  - ReadWriteOnce
+  hostPath:
+    path: /home/k8s-user/sqlite/binance    
+{{- end }}

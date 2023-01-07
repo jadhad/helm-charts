@@ -1,0 +1,4 @@
+apiVersion: v2
+description: Binance-Freqtrade
+name: binance-freqtrade
+version: 0.0.0
