@@ -7,6 +7,6 @@ entries:
     digest: d6a4e88b43c1cc1d8c75b28d60e384e9bb8141043cf5ba97c72a54c4635d5083
     name: binance-freqtrade
     urls:
-    - https://github.com/jadhad/helm-charts/binance-freqtrade-0.0.0.tgz
+    - https://jadhad.github.io/helm-charts/binance-freqtrade-0.0.0.tgz
     version: 0.0.0
 generated: "2023-01-07T07:39:42.7646446+02:00"
